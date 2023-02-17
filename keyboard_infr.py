@@ -43,6 +43,7 @@ class Input(ctypes.Structure):
 
 
 # Actuals Functions
+
 def PressKey(hexKeyCode):
     extra = ctypes.c_ulong(0)
     ii_ = Input_I()
