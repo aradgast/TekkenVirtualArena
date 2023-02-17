@@ -43,26 +43,34 @@ class Input(ctypes.Structure):
 
 
 # Actuals Functions
+class KeyBoardInterface:
+    def __init__(self):
+        pass
 
-def PressKey(hexKeyCode):
-    extra = ctypes.c_ulong(0)
-    ii_ = Input_I()
-    ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra))
-    x = Input(ctypes.c_ulong(1), ii_)
-    ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
+    def PressKey(self, hexKeyCode):
+        extra = ctypes.c_ulong(0)
+        ii_ = Input_I()
+        ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008, 0, ctypes.pointer(extra))
+        x = Input(ctypes.c_ulong(1), ii_)
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
 
-def ReleaseKey(hexKeyCode):
-    extra = ctypes.c_ulong(0)
-    ii_ = Input_I()
-    ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008 | 0x0002, 0,
-                        ctypes.pointer(extra))
-    x = Input(ctypes.c_ulong(1), ii_)
-    ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
+    def ReleaseKey(self, hexKeyCode):
+        extra = ctypes.c_ulong(0)
+        ii_ = Input_I()
+        ii_.ki = KeyBdInput(0, hexKeyCode, 0x0008 | 0x0002, 0,
+                            ctypes.pointer(extra))
+        x = Input(ctypes.c_ulong(1), ii_)
+        ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
+    def pressNrelease(self, hexKeyCode, delay = 0.001):
+        self.PressKey(hexKeyCode)
+        time.sleep(delay)
+        self.ReleaseKey(hexKeyCode)
 
 # directx scan codes
 # http://www.gamespp.com/directx/directInputKeyboardScanCodes.html
+# https://gist.github.com/tracend/912308
 
 if __name__ == '__main__':
     symb_to_hex = {'w': 0x11, 'a': 0x1E, 's': 0x1F, 'd': 0x20, 'up': 0xC8, 'left': 0xCB, 'right': 0xCD, 'down': 0xD0,
@@ -72,11 +80,9 @@ if __name__ == '__main__':
                    'space': 0x39, 'shift': 0x2A, 'ctrl': 0x1D, 'alt': 0x38, 'tab': 0x0F}
 
     while (True):
-        PressKey(symb_to_hex['s'])
-        time.sleep(0.1)
-        ReleaseKey(symb_to_hex['s'])
-        time.sleep(1)
-        PressKey(symb_to_hex['right'])
-        time.sleep(0.5)
-        ReleaseKey(symb_to_hex['right'])
-        time.sleep(1)
+        k = KeyBoardInterface()
+        k.pressNrelease(symb_to_hex['w'], 0.1)
+        k.pressNrelease(symb_to_hex['a'], 0.1)
+        k.pressNrelease(symb_to_hex['s'], 0.1)
+        k.pressNrelease(symb_to_hex['d'], 0.1)
+        k.pressNrelease(symb_to_hex['up'], 0.1)
