@@ -3,6 +3,7 @@ from keyboard_infr import KeyBoardInterface as KI
 import time
 from grid import Grid
 
+
 class Player:
     def __init__(self, player_num, dict):
         self.player_num = player_num
@@ -34,7 +35,7 @@ class Player:
         self.__get_height_and_width()
         self.cap = cv.VideoCapture(self.source)
 
-        alpha = 1.5
+        alpha = 1.7
         width = int(self.width * alpha)
         height = int(self.height)  # (se
         self.grid = Grid(height, width * 3)
@@ -45,15 +46,15 @@ class Player:
         thrash_width = 100
         cy = cy - offset_height
         if self.center[0] > cx + thrash_width:
-            self.keyboard.PressKey(self.dict['right'])
-            # cv2.putText(frame, f"Move: {'left'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
-            self.pressed_move_key = 'right'
-            print(f'right is pressed')
-        elif self.center[0] < cx - thrash_width:
             self.keyboard.PressKey(self.dict['left'])
-            # cv2.putText(frame, f"Move: {'right'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+            # cv2.putText(frame, f"Move: {'left'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'left'
             print(f'left is pressed')
+        elif self.center[0] < cx - thrash_width:
+            self.keyboard.PressKey(self.dict['right'])
+            # cv2.putText(frame, f"Move: {'right'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+            self.pressed_move_key = 'right'
+            print(f'right is pressed')
         elif self.center[1] > cy + thrash_height:
             self.keyboard.PressKey(self.dict['up'])
             # cv2.putText(frame, f"Move: {'up'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
@@ -78,48 +79,11 @@ class Player:
             except Exception as e:
                 print("the key is not pressed", e)
 
-
-
-
     def action(self, diff_frame, center):
         key = self.grid.active(diff_frame, center)
         if key is not None:
             self.keyboard.pressNrelease(self.dict[key])
-        # count_kick = 0
-        # count_punch = 0
-        # for contour in diff_contours:
-        #     (x, y, w, h) = cv.boundingRect(contour)
-        #     center_x = int(x + w // 2)
-        #     center_y = int(y + h // 2)
-        #     if cv.contourArea(contour) < 250:
-        #         continue
-        #     if 0 <= center_x <= frame.shape[0] / 3 and 0 <= center_y <= frame.shape[1] / 3:
-        #         count_kick += 1
-        #     if 0 <= center_x <= frame.shape[0] / 3 and frame.shape[1] / 3 <= center_y <= 2 * frame.shape[1] / 3:
-        #         count_punch += 1
-        #     cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # draw differences
-        #     cv.circle(frame, (center_x, center_y), 1, (0, 0, 255), 4)
-        #
-        # if count_kick == 0:
-        #     self.kick_flag = False
-        #
-        # if count_punch == 0:
-        #     self.punch_flag = False
-        #
-        # act = count_kick + count_punch
-        #
-        # if (count_kick >= count_punch) and (self.kick_flag == False):
-        #     key = 'kick_left'
-        #     self.keyboard.pressNrelease(self.dict['kick_left'])
-        #     print(f'kick_left is pressed')
-        #     self.kick_flag = True
-        # elif (count_kick < count_punch) and (self.punch_flag == False):
-        #     key = 'punch_right'
-        #     self.keyboard.pressNrelease(self.dict['punch_right'])
-        #     print(f'punch_right is pressed')
-        #     self.punch_flag = True
-
-        # return key, act
+            print(f"key {key} is pressed")
 
     def draw_activation_grid(self, frame, cx, cy):
         alpha = 1.5
@@ -133,8 +97,6 @@ class Player:
         cv.line(frame, (left - width, top + height // 3), (left + (2 * width), top + height // 3), (0, 255, 0), 2)
         cv.line(frame, (left - width, top + (2 * height) // 3), (left + (2 * width), top + (2 * height) // 3),
                 (0, 255, 0), 2)
-
-
 
     def __get_height_and_width(self):
         print(f"press SPCAE when ready to acquire height and width for player {self.player_num}")
@@ -152,7 +114,8 @@ class Player:
             sort_contours = sorted(contours, key=cv.contourArea)
             try:
                 x, y, w, h = cv.boundingRect(sort_contours[-1])
-            except: continue
+            except:
+                continue
             cv.rectangle(original_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv.imshow("get height and width for player {}".format(self.player_num), original_frame)
             cv.imshow("thresh", thresh)
@@ -164,7 +127,7 @@ class Player:
                 break
             elif k % 256 == 32:
                 # SPACE pressed
-                if (input("are you sure? (y/n) ") == 'n'):
+                if input("are you sure? (y/n) ") == 'n':
                     print("try again")
                     k = cv.waitKey(1)
                     continue
@@ -200,7 +163,7 @@ class Player:
                 break
             elif k % 256 == 32:
                 # SPACE pressed
-                if (input("are you sure? (y/n) ") == 'n'):
+                if input("are you sure? (y/n) ") == 'n':
                     print("try again")
                     k = cv.waitKey(1)
                     continue

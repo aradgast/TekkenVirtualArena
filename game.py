@@ -2,6 +2,7 @@ import time
 import cv2 as cv
 from player import Player
 
+
 class Game:
     def __init__(self, num_players=1, source=None):
         self.symb_to_hex_player2 = {'up': 0x48,
@@ -14,8 +15,8 @@ class Game:
                                     'kick_right': 0x24}  # 'j': 0x24 circle
 
         self.symb_to_hex_player1 = {'up': 0xC8,
-                                    'left': 0xCB,
-                                    'right': 0xCD,
+                                    'right': 0xCB,  # swiched left and right
+                                    'left': 0xCD,
                                     'down': 0xD0,
                                     'punch_left': 0x1F,  # 's': 0x1F square
                                     'punch_right': 0x20,  # 'd': 0x20 triangle

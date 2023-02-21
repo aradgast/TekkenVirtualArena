@@ -29,8 +29,10 @@ class Grid:
             self.squares[i].active(diff_frame, self.centers[i])
 
         if self.squares[3].active_flag and self.squares[6].active_flag:
-            print('kick_right')
             return 'kick_right'
         elif self.squares[0].active_flag:
-            print('punch_left')
+            return 'punch_left'
+        elif self.squares[5].active_flag and self.squares[8].active_flag:
+            return 'kick_right'
+        elif self.squares[2].active_flag:
             return 'punch_left'
