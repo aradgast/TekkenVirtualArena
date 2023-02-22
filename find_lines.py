@@ -35,3 +35,12 @@ def find_lines(frame):
     cv.imshow('find lines in frame', cdst)
     cv.waitKey(1)
     return count > 0
+
+if __name__ == '__main__':
+    cap = cv.VideoCapture(0)
+    while True:
+        ret, frame = cap.read()
+        if ret:
+            find_lines(frame)
+        else:
+            break

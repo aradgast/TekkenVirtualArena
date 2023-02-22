@@ -4,31 +4,37 @@ import time
 from grid import Grid
 from legend import *
 
+
 class Player:
-    def __init__(self, player_num, dict):
+    def __init__(self, player_num, dict, keyboard, cap=None, source=None):
         self.player_num = player_num
         self.dict = dict
         self.height = None
         self.width = None
         self.background = None
         self.center = None
-        self.keyboard = KI()
+        self.keyboard = keyboard
         self.pressed_move_key = None
         self.pressed_punch_key = False
         self.pressed_kick_key = False
         self.move_counter = 0
         self.punch_counter = 0
         self.kick_counter = 0
+        self.binary_thresh = BINARY_THRESHOLD
 
         # initialize the player source
-        source = input(f"Enter the source of the video for player{player_num}: ")
-        if source.isnumeric():
-            self.source = int(source)
+        if cap is None:
+            source = input(f"Enter the source of the video for player{player_num}: ")
+            if source.isnumeric():
+                self.source = int(source)
+            else:
+                self.source = source
+
+            # initialize the player video capture
+            self.cap = cv.VideoCapture(self.source)
         else:
             self.source = source
-
-        # initialize the player video capture
-        self.cap = cv.VideoCapture(self.source)
+            self.cap = cap
 
         # initialize the player background
         self.__get_background()
@@ -38,7 +44,7 @@ class Player:
         self.__get_height_and_width()
         # self.cap = cv.VideoCapture(self.source)
 
-        alpha = 1.7
+        alpha = ALPHA
         width = int(self.width * alpha)
         height = int(self.height)  # (se
         self.grid = Grid(height, width * 3)
@@ -110,11 +116,11 @@ class Player:
 
                 if self.punch_counter <= 0:
                     if key[:5] == 'punch':
-                            self.keyboard.ReleaseKey(self.dict['punch_left'])
-                            self.keyboard.ReleaseKey(self.dict['punch_right'])
-                            self.pressed_punch_key = True
-                            self.keyboard.pressNrelease(self.dict['punch_left'])
-                            self.keyboard.pressNrelease(self.dict['punch_right'])
+                        self.keyboard.ReleaseKey(self.dict['punch_left'])
+                        self.keyboard.ReleaseKey(self.dict['punch_right'])
+                        self.pressed_punch_key = True
+                        self.keyboard.pressNrelease(self.dict['punch_left'])
+                        self.keyboard.pressNrelease(self.dict['punch_right'])
                     else:
                         self.keyboard.ReleaseKey(self.dict['punch_right'])
                         self.keyboard.ReleaseKey(self.dict['punch_left'])
@@ -123,7 +129,7 @@ class Player:
                     self.punch_counter -= 1
 
     def draw_activation_grid(self, frame, cx, cy):
-        alpha = 1.2
+        alpha = ALPHA
         width = int(self.width * alpha)
         height = int(self.height)  # (self.height * alpha)
         left = cx - width // 2
@@ -148,27 +154,45 @@ class Player:
             blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
             for i in range(3):
                 blur = cv.medianBlur(blur, MEDIAN_KERNEL)
-            ret, thresh = cv.threshold(blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
+            ret, thresh = cv.threshold(blur, self.binary_thresh, 255, cv.THRESH_BINARY)
             contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
             sort_contours = sorted(contours, key=cv.contourArea)
             try:
                 c = sort_contours[-1]
-                if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.9:
+                if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.8:
                     x, y, w, h = cv.boundingRect(sort_contours[-2])
                 else:
                     x, y, w, h = cv.boundingRect(c)
             except:
                 continue
+            # w = h // 2 #!!!!!!!!!!!!!!!!!!!!!!
             cv.rectangle(original_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            try:
+                if k%256 == 54:
+                    if self.binary_thresh < 255:
+                        self.binary_thresh += 1
+                        print("BINARY_THRESHOLD: {}".format(self.binary_thresh))
+                        cv.text(original_frame, "BINARY_THRESHOLD: {}".format(self.binary_thresh), (10, 30),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                elif k%256 == 52:
+                    if self.binary_thresh > 0:
+                        self.binary_thresh -= 1
+                        print("BINARY_THRESHOLD: {}".format(self.binary_thresh))
+                        cv.text(original_frame, "BINARY_THRESHOLD: {}".format(self.binary_thresh), (10, 30),
+                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            except:
+                pass
             cv.imshow("get height and width for player {}".format(self.player_num), original_frame)
             # cv.imshow("thresh", thresh)
             # cv.imshow("subtract image", blur)
             k = cv.waitKey(1)
+
             if type(self.source) != int:
                 time.sleep(1)
             if k % 256 == 27:
                 # ESC pressed
                 print("Escape hit, closing...")
+                self.__init__(self.player_num, self.dict, self.keyboard, self.cap, self.source) #player_num, dict, keyboard, cap=None
                 break
             elif k % 256 == 32:
                 # SPACE pressed

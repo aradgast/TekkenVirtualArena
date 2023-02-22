@@ -1,6 +1,6 @@
 import cv2 as cv
 from find_lines import find_lines
-
+from legend import *
 from square import Square, MiddleSquare
 import numpy as np
 class Grid:
@@ -11,7 +11,8 @@ class Grid:
         self.squares = []
         self.centers = []
         self.prev_center = None
-        self.center_vel = 0
+        self.center_vel = [0 for i in range(CENTER_VEL_SIZE)]
+        self.center_vel_idx = 0
 
         self.__create_squares()
 
@@ -35,21 +36,23 @@ class Grid:
         if self.prev_center is None:
             self.prev_center = center
         else:
-            self.center_vel = np.square(np.array(center[0]) - np.array(self.prev_center[0])).mean()
+            self.center_vel[self.center_vel_idx] = np.square(np.array(center[0]) - np.array(self.prev_center[0])).mean()
+            self.center_vel_idx = (self.center_vel_idx + 1) % CENTER_VEL_SIZE
             self.prev_center = center
         self.centers = []
         self._get_squares_centers(center)
         for i in range(9):
             self.squares[i].active(diff_thresh, self.centers[i])
 
-        if self.squares[3].active_flag and self.squares[6].active_flag:
-            if self.center_vel > 10:
-                print(f'center_vel: {self.center_vel}')
+        if self.squares[3].active_flag and self.squares[6].active_flag or self.squares[5].active_flag and self.squares[8].active_flag:
+            max_vel = np.max(np.array(self.center_vel))
+            if max_vel > VELOCITY_THRESHOLD:
+                print(f'center_vel: {max_vel}')
                 return 'kick_right'
             else:
-                print(f'center_vel: {self.center_vel}')
+                print(f'center_vel: {max_vel}')
                 return 'kick_left'
-        elif self.squares[0].active_flag:
+        elif self.squares[0].active_flag or self.squares[2].active_flag:
             try:
                 x_min = max(0, self.centers[1][0] - self.width // 6)
                 x_max = min(diff_thresh.shape[1], self.centers[1][0] + self.width // 6)
@@ -64,25 +67,25 @@ class Grid:
             except IndexError:
                 print('IndexError')
                 pass
-            x_min = max(0, self.centers[1][0] - self.width // 2)
-            x_max = min(diff_thresh.shape[1], self.centers[1][0] + self.width // 2)
-            y_min = max(0, self.centers[1][1] - self.height // 2)
-            y_max = min(diff_thresh.shape[0], self.centers[1][1] + self.height // 2)
-            gray = gray[y_min: y_max, x_min:x_max]
-            is_right = find_lines(gray)
-            if is_right:             # and self.squares[4].active_flag:
-                return 'punch_right'
-            else:
-                return 'punch_left'
+            # x_min = max(0, self.centers[1][0] - self.width // 2)
+            # x_max = min(diff_thresh.shape[1], self.centers[1][0] + self.width // 2)
+            # y_min = max(0, self.centers[1][1] - self.height // 2)
+            # y_max = min(diff_thresh.shape[0], self.centers[1][1] + self.height // 2)
+            # gray = gray[y_min: y_max, x_min:x_max]
+            # is_right = find_lines(gray)
+            # if is_right:             # and self.squares[4].active_flag:
+            #     return 'punch_right'
+            # else:
+            #     return 'punch_left'
 
-        elif self.squares[5].active_flag and self.squares[8].active_flag:
-            if self.center_vel > 10:
-                return 'kick_right'
-            else:
-                print(f'center_vel: {self.center_vel}')
-                return 'kick_left'
-        elif self.squares[2].active_flag:
-            if self.squares[4].active_flag:
-                return 'punch_right'
-            else:
-                return 'punch_left'
+        # elif self.squares[5].active_flag and self.squares[8].active_flag:
+        #     if self.center_vel > 10:
+        #         return 'kick_right'
+        #     else:
+        #         print(f'center_vel: {self.center_vel}')
+        #         return 'kick_left'
+        # elif self.squares[2].active_flag:
+        #     if self.squares[4].active_flag:
+        #         return 'punch_right'
+        #     else:
+        #         return 'punch_left'

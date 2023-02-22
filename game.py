@@ -2,6 +2,8 @@ import time
 import cv2 as cv
 from player import Player
 from legend import *
+from keyboard_infr import KeyBoardInterface as KI
+
 
 class Game:
     def __init__(self, num_players=1):
@@ -24,13 +26,12 @@ class Game:
                                     'kick_right': 0x2D}  # 'x': 0x2D circle
 
         self.symb_to_hex = [self.symb_to_hex_player1, self.symb_to_hex_player2]
-
+        self.keyboard = KI()
         self.num_players = num_players
-        self.players = [Player(i, self.symb_to_hex[i - 1]) for i in range(1, num_players + 1)]
+        self.players = [Player(i, self.symb_to_hex[i - 1], self.keyboard) for i in range(1, num_players + 1)]
         print("initialized game with {} players".format(num_players))
 
     def play(self):
-
 
         while True:
             for player in self.players:
@@ -63,8 +64,8 @@ class Game:
                     diff_blur = cv.medianBlur(diff_blur, MEDIAN_KERNEL)
 
                 # Threshold the image to create a binary image
-                ret, thresh = cv.threshold(blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
-                ret, diff_thresh = cv.threshold(diff_blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
+                ret, thresh = cv.threshold(blur, player.binary_thresh, 255, cv.THRESH_BINARY)
+                ret, diff_thresh = cv.threshold(diff_blur, player.binary_thresh, 255, cv.THRESH_BINARY)
 
                 thresh = cv.dilate(thresh, None, iterations=3)
                 diff_thresh = cv.dilate(diff_thresh, None, iterations=3)
@@ -111,7 +112,7 @@ class Game:
             if cv.waitKey(1) == 27:
                 break
 
+
 if __name__ == '__main__':
     g = Game(1)
     g.play()
-
