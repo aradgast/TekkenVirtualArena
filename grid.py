@@ -22,11 +22,11 @@ class Grid:
                 self.centers.append((center[0] - self.width // 2 + self.width // 6 + self.width // 3 * j,
                                      center[1] - self.height // 2 + self.height // 6 + self.height // 3 * i))
 
-    def active(self, diff_frame, center):
+    def active(self, diff_thresh, center):
         self.centers = []
         self._get_squares_centers(center)
         for i in range(9):
-            self.squares[i].active(diff_frame, self.centers[i])
+            self.squares[i].active(diff_thresh, self.centers[i])
 
         if self.squares[3].active_flag and self.squares[6].active_flag:
             return 'kick_right'

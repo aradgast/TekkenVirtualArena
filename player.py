@@ -16,6 +16,7 @@ class Player:
         self.kick_flag = False
         self.punch_flag = False
         self.pressed_move_key = None
+        self.move_counter = 0
 
         # initialize the player source
         source = input(f"Enter the source of the video for player{player_num}: ")
@@ -50,22 +51,29 @@ class Player:
             # cv2.putText(frame, f"Move: {'left'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'left'
             print(f'left is pressed')
+            self.move_counter = 5
         elif self.center[0] < cx - thrash_width:
             self.keyboard.PressKey(self.dict['right'])
             # cv2.putText(frame, f"Move: {'right'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'right'
             print(f'right is pressed')
+            self.move_counter = 5
+
         elif self.center[1] > cy + thrash_height:
             self.keyboard.PressKey(self.dict['up'])
             # cv2.putText(frame, f"Move: {'up'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'up'
             print(f'up is pressed')
+            self.move_counter = 5
+
         elif self.center[1] < cy - thrash_height:
             self.keyboard.PressKey(self.dict['down'])
             # cv2.putText(frame, f"Move: {'down'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'down'
             print(f'down is pressed')
-        else:
+            self.move_counter = 5
+
+        elif self.move_counter <= 0:
             try:
                 self.keyboard.ReleaseKey(self.dict['right'])
                 self.keyboard.ReleaseKey(self.dict['left'])
@@ -78,9 +86,11 @@ class Player:
                 self.pressed_move_key = None
             except Exception as e:
                 print("the key is not pressed", e)
+        else:
+            self.move_counter -= 1
 
-    def action(self, diff_frame, center):
-        key = self.grid.active(diff_frame, center)
+    def action(self, diff_thresh, center):
+        key = self.grid.active(diff_thresh, center)
         if key is not None:
             self.keyboard.pressNrelease(self.dict[key])
             print(f"key {key} is pressed")
@@ -120,7 +130,8 @@ class Player:
             cv.imshow("get height and width for player {}".format(self.player_num), original_frame)
             cv.imshow("thresh", thresh)
             k = cv.waitKey(1)
-            # time.sleep(1)  # !!!!!!!!!!!!!
+            if type(self.source) != int:
+                time.sleep(1)
             if k % 256 == 27:
                 # ESC pressed
                 print("Escape hit, closing...")
@@ -156,7 +167,8 @@ class Player:
             cv.imshow("get background from player {}".format(self.player_num), frame)
 
             k = cv.waitKey(1)
-            # time.sleep(1)  # !!!!!!!!!!!!!
+            if type(self.source) != int:
+                time.sleep(1)
             if k % 256 == 27:
                 # ESC pressed
                 print("Escape hit, closing...")
@@ -170,5 +182,5 @@ class Player:
                 cv.imshow("background", frame)
                 self.cap.release()
                 cv.destroyAllWindows()
-                self.background = frame
+                self.background = cv.GaussianBlur(frame, (21, 21), 0)
                 break
