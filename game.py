@@ -1,7 +1,7 @@
 import time
 import cv2 as cv
 from player import Player
-
+from legend import *
 
 class Game:
     def __init__(self, num_players=1):
@@ -15,8 +15,8 @@ class Game:
                                     'kick_right': 0x24}  # 'j': 0x24 circle
 
         self.symb_to_hex_player1 = {'up': 0xC8,
-                                    'right': 0xCB,  # switched left and right
-                                    'left': 0xCD,
+                                    'left': 0xCB,
+                                    'right': 0xCD,
                                     'down': 0xD0,
                                     'punch_left': 0x1F,  # 's': 0x1F square
                                     'punch_right': 0x20,  # 'd': 0x20 triangle
@@ -55,12 +55,16 @@ class Game:
                 diff_gray = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
 
                 # Blur the frame to reduce noise
-                blur = cv.GaussianBlur(gray, (21, 21), 0)
-                diff_blur = cv.GaussianBlur(diff_gray, (5, 5), 0)
+                blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
+                diff_blur = cv.GaussianBlur(diff_gray, GAUSS_KERNEL, 0)
+
+                for i in range(3):
+                    blur = cv.medianBlur(blur, MEDIAN_KERNEL)
+                    diff_blur = cv.medianBlur(diff_blur, MEDIAN_KERNEL)
 
                 # Threshold the image to create a binary image
-                ret, thresh = cv.threshold(blur, 50, 255, cv.THRESH_BINARY)
-                ret, diff_thresh = cv.threshold(diff_blur, 50, 255, cv.THRESH_BINARY)
+                ret, thresh = cv.threshold(blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
+                ret, diff_thresh = cv.threshold(diff_blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
 
                 thresh = cv.dilate(thresh, None, iterations=3)
                 diff_thresh = cv.dilate(diff_thresh, None, iterations=3)
@@ -72,6 +76,8 @@ class Game:
                 sort_contours = sorted(contours, key=cv.contourArea)
                 try:
                     c = sort_contours[-1]
+                    if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.9:
+                        c = sort_contours[-2]
 
                     # Find the center of mass of the contour
                     M = cv.moments(c)
@@ -83,7 +89,7 @@ class Game:
 
                     # check if the player moved
                     player.move(cx, cy)
-                    player.action(diff_thresh, (cx, cy))
+                    player.action(diff_thresh, (cx, cy), gray)
 
                     # Find the bounding box of the contour
                     x, y, w, h = cv.boundingRect(c)
@@ -95,7 +101,7 @@ class Game:
                     # Display the resulting frame
                     cv.imshow(f"player{player.player_num}", original_frame)
                     cv.imshow("thresh", thresh)
-                    # cv2.imshow('ret', diff_thresh)
+                    cv.imshow('diff_thresh', diff_thresh)
                     cv.waitKey(1)
 
                 except Exception as e:

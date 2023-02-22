@@ -2,7 +2,7 @@ import cv2 as cv
 from keyboard_infr import KeyBoardInterface as KI
 import time
 from grid import Grid
-
+from legend import *
 
 class Player:
     def __init__(self, player_num, dict):
@@ -13,10 +13,12 @@ class Player:
         self.background = None
         self.center = None
         self.keyboard = KI()
-        self.kick_flag = False
-        self.punch_flag = False
         self.pressed_move_key = None
+        self.pressed_punch_key = False
+        self.pressed_kick_key = False
         self.move_counter = 0
+        self.punch_counter = 0
+        self.kick_counter = 0
 
         # initialize the player source
         source = input(f"Enter the source of the video for player{player_num}: ")
@@ -30,11 +32,11 @@ class Player:
 
         # initialize the player background
         self.__get_background()
-        self.cap = cv.VideoCapture(self.source)
+        # self.cap = cv.VideoCapture(self.source)
 
         # initialize the player height and width
         self.__get_height_and_width()
-        self.cap = cv.VideoCapture(self.source)
+        # self.cap = cv.VideoCapture(self.source)
 
         alpha = 1.7
         width = int(self.width * alpha)
@@ -42,7 +44,7 @@ class Player:
         self.grid = Grid(height, width * 3)
 
     def move(self, cx, cy):
-        thrash_height = 50
+        thrash_height = 60
         offset_height = 20
         thrash_width = 100
         cy = cy - offset_height
@@ -74,29 +76,47 @@ class Player:
             self.move_counter = 5
 
         elif self.move_counter <= 0:
-            try:
-                self.keyboard.ReleaseKey(self.dict['right'])
-                self.keyboard.ReleaseKey(self.dict['left'])
-                self.keyboard.ReleaseKey(self.dict['up'])
-                self.keyboard.ReleaseKey(self.dict['down'])
-                self.keyboard.ReleaseKey(self.dict['kick_right'])
-                self.keyboard.ReleaseKey(self.dict['kick_left'])
-                self.keyboard.ReleaseKey(self.dict['punch_right'])
-                self.keyboard.ReleaseKey(self.dict['punch_left'])
-                self.pressed_move_key = None
-            except Exception as e:
-                print("the key is not pressed", e)
+            # try:
+            self.keyboard.ReleaseKey(self.dict['right'])
+            self.keyboard.ReleaseKey(self.dict['left'])
+            self.keyboard.ReleaseKey(self.dict['up'])
+            self.keyboard.ReleaseKey(self.dict['down'])
+            self.pressed_move_key = None
+            # except Exception as e:
+            #     print("the key is not pressed", e)
         else:
             self.move_counter -= 1
 
-    def action(self, diff_thresh, center):
-        key = self.grid.active(diff_thresh, center)
+    def action(self, diff_thresh, center, gray):
+        key = self.grid.active(diff_thresh, center, gray)
         if key is not None:
-            self.keyboard.pressNrelease(self.dict[key])
-            print(f"key {key} is pressed")
+            if key[:4] == 'kick' and not self.pressed_kick_key:
+                self.keyboard.PressKey(self.dict[key])
+                print(f"key {key} is pressed")
+                self.pressed_kick_key = True
+                self.kick_counter = 5
+            elif key[:5] == 'punch' and not self.pressed_punch_key:
+                self.keyboard.PressKey(self.dict[key])
+                print(f"key {key} is pressed")
+                self.pressed_punch_key = True
+                self.punch_counter = 5
+            else:
+                if self.kick_counter <= 0:
+                    self.keyboard.ReleaseKey(self.dict['kick_right'])
+                    self.keyboard.ReleaseKey(self.dict['kick_left'])
+                    self.pressed_kick_key = False
+                else:
+                    self.kick_counter -= 1
+
+                if self.punch_counter <= 0:
+                    self.keyboard.ReleaseKey(self.dict['punch_right'])
+                    self.keyboard.ReleaseKey(self.dict['punch_left'])
+                    self.pressed_punch_key = False
+                else:
+                    self.punch_counter -= 1
 
     def draw_activation_grid(self, frame, cx, cy):
-        alpha = 1.5
+        alpha = 1.2
         width = int(self.width * alpha)
         height = int(self.height)  # (self.height * alpha)
         left = cx - width // 2
@@ -118,17 +138,24 @@ class Player:
                 frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
 
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            blur = cv.GaussianBlur(gray, (21, 21), 0)
-            ret, thresh = cv.threshold(blur, 50, 255, cv.THRESH_BINARY)
+            blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
+            for i in range(3):
+                blur = cv.medianBlur(blur, MEDIAN_KERNEL)
+            ret, thresh = cv.threshold(blur, BINARY_THRESHOLD, 255, cv.THRESH_BINARY)
             contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
             sort_contours = sorted(contours, key=cv.contourArea)
             try:
-                x, y, w, h = cv.boundingRect(sort_contours[-1])
+                c = sort_contours[-1]
+                if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.9:
+                    x, y, w, h = cv.boundingRect(sort_contours[-2])
+                else:
+                    x, y, w, h = cv.boundingRect(c)
             except:
                 continue
             cv.rectangle(original_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv.imshow("get height and width for player {}".format(self.player_num), original_frame)
-            cv.imshow("thresh", thresh)
+            # cv.imshow("thresh", thresh)
+            # cv.imshow("subtract image", blur)
             k = cv.waitKey(1)
             if type(self.source) != int:
                 time.sleep(1)
@@ -143,7 +170,7 @@ class Player:
                     k = cv.waitKey(1)
                     continue
                 print("height: {}, width: {}".format(h, w))
-                self.cap.release()
+                # self.cap.release()
                 cv.destroyAllWindows()
                 self.height, self.width = h, w
                 self.center = (x + w // 2, y + h // 2)
@@ -180,7 +207,7 @@ class Player:
                     k = cv.waitKey(1)
                     continue
                 cv.imshow("background", frame)
-                self.cap.release()
+                # self.cap.release()
                 cv.destroyAllWindows()
-                self.background = cv.GaussianBlur(frame, (21, 21), 0)
+                self.background = cv.GaussianBlur(frame, GAUSS_KERNEL, 0)
                 break
