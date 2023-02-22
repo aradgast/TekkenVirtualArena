@@ -63,7 +63,7 @@ class KeyBoardInterface:
         x = Input(ctypes.c_ulong(1), ii_)
         ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
-    def pressNrelease(self, hexKeyCode, delay = 0.001):
+    def pressNrelease(self, hexKeyCode, delay = 0.01):
         self.PressKey(hexKeyCode)
         time.sleep(delay)
         self.ReleaseKey(hexKeyCode)

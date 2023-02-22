@@ -1,5 +1,5 @@
 import cv2 as cv
-
+from legend import *
 
 class Square:
     def __init__(self, height, width):
@@ -7,8 +7,8 @@ class Square:
         self.width = width
         self.active_flag = False
         self.count = 0
-        self.init_count = 3
-        self.active_threshold = 50
+        self.init_count = SQUARE_ACTIVE_COUNT
+        self.active_threshold = SQUARE_ACTIVE_THRESHOLD
 
     def active(self, diff_thresh, center):
         x_min = max(0, center[0] - self.width // 2)

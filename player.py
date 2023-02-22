@@ -53,27 +53,27 @@ class Player:
             # cv2.putText(frame, f"Move: {'left'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'left'
             print(f'left is pressed')
-            self.move_counter = 5
+            self.move_counter = MOVE_COUNTER
         elif self.center[0] < cx - thrash_width:
             self.keyboard.PressKey(self.dict['right'])
             # cv2.putText(frame, f"Move: {'right'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'right'
             print(f'right is pressed')
-            self.move_counter = 5
+            self.move_counter = MOVE_COUNTER
 
         elif self.center[1] > cy + thrash_height:
             self.keyboard.PressKey(self.dict['up'])
             # cv2.putText(frame, f"Move: {'up'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'up'
             print(f'up is pressed')
-            self.move_counter = 5
+            self.move_counter = MOVE_COUNTER
 
         elif self.center[1] < cy - thrash_height:
             self.keyboard.PressKey(self.dict['down'])
             # cv2.putText(frame, f"Move: {'down'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
             self.pressed_move_key = 'down'
             print(f'down is pressed')
-            self.move_counter = 5
+            self.move_counter = MOVE_COUNTER
 
         elif self.move_counter <= 0:
             # try:
@@ -94,12 +94,12 @@ class Player:
                 self.keyboard.PressKey(self.dict[key])
                 print(f"key {key} is pressed")
                 self.pressed_kick_key = True
-                self.kick_counter = 5
+                self.kick_counter = KICK_COUNTER
             elif key[:5] == 'punch' and not self.pressed_punch_key:
                 self.keyboard.PressKey(self.dict[key])
                 print(f"key {key} is pressed")
                 self.pressed_punch_key = True
-                self.punch_counter = 5
+                self.punch_counter = PUNCH_COUNTER
             else:
                 if self.kick_counter <= 0:
                     self.keyboard.ReleaseKey(self.dict['kick_right'])
@@ -109,9 +109,16 @@ class Player:
                     self.kick_counter -= 1
 
                 if self.punch_counter <= 0:
-                    self.keyboard.ReleaseKey(self.dict['punch_right'])
-                    self.keyboard.ReleaseKey(self.dict['punch_left'])
-                    self.pressed_punch_key = False
+                    if key[:5] == 'punch':
+                            self.keyboard.ReleaseKey(self.dict['punch_left'])
+                            self.keyboard.ReleaseKey(self.dict['punch_right'])
+                            self.pressed_punch_key = True
+                            self.keyboard.pressNrelease(self.dict['punch_left'])
+                            self.keyboard.pressNrelease(self.dict['punch_right'])
+                    else:
+                        self.keyboard.ReleaseKey(self.dict['punch_right'])
+                        self.keyboard.ReleaseKey(self.dict['punch_left'])
+                        self.pressed_punch_key = False
                 else:
                     self.punch_counter -= 1
 
