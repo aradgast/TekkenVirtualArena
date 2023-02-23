@@ -7,7 +7,7 @@ from keyboard_infr import KeyBoardInterface as KI
 
 class Game:
     def __init__(self, num_players=1):
-        self.symb_to_hex_player2 = {'up': 0x48,
+        self.symb_to_hex_player1 = {'up': 0x48,
                                     'left': 0x4B,
                                     'right': 0x4D,
                                     'down': 0x50,
@@ -16,7 +16,7 @@ class Game:
                                     'kick_left': 0x32,  # 'm': 0x32 x
                                     'kick_right': 0x24}  # 'j': 0x24 circle
 
-        self.symb_to_hex_player1 = {'up': 0xC8,
+        self.symb_to_hex_player2 = {'up': 0xC8,
                                     'left': 0xCB,
                                     'right': 0xCD,
                                     'down': 0xD0,
@@ -32,7 +32,10 @@ class Game:
         print("initialized game with {} players".format(num_players))
 
     def play(self):
-
+        for i in range(5):
+            print("starting in {} seconds".format(5-i))
+            time.sleep(1)
+        print("starting now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         while True:
             for player in self.players:
                 ret, original_frame = player.cap.read()

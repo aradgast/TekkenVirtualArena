@@ -114,17 +114,23 @@ class Player:
                 else:
                     self.kick_counter -= 1
 
+                # if self.punch_counter <= 0:
+                    # if key[:5] == 'punch':
+                    #     self.keyboard.ReleaseKey(self.dict['punch_left'])
+                    #     self.keyboard.ReleaseKey(self.dict['punch_right'])
+                    #     self.pressed_punch_key = True
+                    #     self.keyboard.pressNrelease(self.dict['punch_left'])
+                    #     self.keyboard.pressNrelease(self.dict['punch_right'])
+                    # else:
+                    #     self.keyboard.ReleaseKey(self.dict['punch_right'])
+                    #     self.keyboard.ReleaseKey(self.dict['punch_left'])
+                    #     self.pressed_punch_key = False
+                # else:
+                #         self.punch_counter -= 1
                 if self.punch_counter <= 0:
-                    if key[:5] == 'punch':
-                        self.keyboard.ReleaseKey(self.dict['punch_left'])
-                        self.keyboard.ReleaseKey(self.dict['punch_right'])
-                        self.pressed_punch_key = True
-                        self.keyboard.pressNrelease(self.dict['punch_left'])
-                        self.keyboard.pressNrelease(self.dict['punch_right'])
-                    else:
-                        self.keyboard.ReleaseKey(self.dict['punch_right'])
-                        self.keyboard.ReleaseKey(self.dict['punch_left'])
-                        self.pressed_punch_key = False
+                    self.keyboard.ReleaseKey(self.dict['punch_right'])
+                    self.keyboard.ReleaseKey(self.dict['punch_left'])
+                    self.pressed_punch_key = False
                 else:
                     self.punch_counter -= 1
 

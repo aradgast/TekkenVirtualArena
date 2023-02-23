@@ -54,13 +54,15 @@ class Grid:
                 return 'kick_left'
         elif self.squares[0].active_flag or self.squares[2].active_flag:
             try:
-                x_min = max(0, self.centers[1][0] - self.width // 6)
-                x_max = min(diff_thresh.shape[1], self.centers[1][0] + self.width // 6)
-                y_min = max(0, self.centers[1][1] - self.height // 6)
-                y_max = min(diff_thresh.shape[0], self.centers[1][1] + self.height // 6)
+                cx = self.centers[4][0]
+                cy = (self.centers[1][1] + self.centers[4][1]) // 2
+                x_min = max(0, cx - self.width // 6)
+                x_max = min(diff_thresh.shape[1], cx + self.width // 6)
+                y_min = max(0, cy - self.height // 6)
+                y_max = min(diff_thresh.shape[0], cy + self.height // 6)
                 gray = gray[y_min: y_max, x_min:x_max]
-                is_right = find_lines(gray)
-                if is_right:             # and self.squares[4].active_flag:
+                is_right = find_lines(gray, self.height)
+                if is_right:             # and self.squares[4].active_flag:ss
                     return 'punch_right'
                 else:
                     return 'punch_left'

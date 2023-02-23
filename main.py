@@ -4,5 +4,5 @@ import numpy as np
 
 if __name__ == '__main__':
 
-    g = Game(1)
+    g = Game(2)
     g.play()
