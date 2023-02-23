@@ -6,17 +6,17 @@ from keyboard_infr import KeyBoardInterface as KI
 import numpy as np
 
 class Game:
-    def __init__(self, num_players=1):
-        self.symb_to_hex_player1 = {'up': 0x48,
-                                    'left': 0x4B,
-                                    'right': 0x4D,
-                                    'down': 0x50,
+    def __init__(self, num_players=1, caps = None, sources = None):
+        self.symb_to_hex_player2 = {'up': 0x09,
+                                    'left': 0x05,
+                                    'right': 0x07,
+                                    'down': 0x03,
                                     'punch_left': 0x31,  # 'n': 0x31 square
                                     'punch_right': 0x25,  # 'k': 0x25 triangle
                                     'kick_left': 0x32,  # 'm': 0x32 x
                                     'kick_right': 0x24}  # 'j': 0x24 circle
 
-        self.symb_to_hex_player2 = {'up': 0xC8,
+        self.symb_to_hex_player1 = {'up': 0xC8,
                                     'left': 0xCB,
                                     'right': 0xCD,
                                     'down': 0xD0,
@@ -28,7 +28,13 @@ class Game:
         self.symb_to_hex = [self.symb_to_hex_player1, self.symb_to_hex_player2]
         self.keyboard = KI()
         self.num_players = num_players
-        self.players = [Player(i, self.symb_to_hex[i - 1], self.keyboard) for i in range(1, num_players + 1)]
+
+        if caps is None:
+            self.players = [Player(i, self.symb_to_hex[i - 1], self.keyboard) for i in range(1, num_players + 1)]
+            self.caps = [player.cap for player in self.players]
+            self.sources = [player.source for player in self.players]
+        else:
+            self.players = [Player(i, self.symb_to_hex[i - 1], self.keyboard, self.caps[i-1], self.sources[i-1]) for i in range(1, num_players + 1)]
         print("initialized game with {} players".format(num_players))
 
     def play(self):
@@ -63,7 +69,7 @@ class Game:
                 blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
                 diff_blur = cv.GaussianBlur(diff_gray, GAUSS_KERNEL, 0)
 
-                for i in range(3):
+                for i in range(MEDIAN_FILTER):
                     blur = cv.medianBlur(blur, MEDIAN_KERNEL)
                     diff_blur = cv.medianBlur(diff_blur, MEDIAN_KERNEL)
 
@@ -117,8 +123,13 @@ class Game:
                     pass
             # write a condition to wait to an Esc key press to exit the game
             if cv.waitKey(1) == 27:
-                break
-
+                print('NEW GAME')
+                self.__init__(self.num_players, self.caps, self.sources)
+                for i in range(5):
+                    print("starting in {} seconds".format(5 - i))
+                    time.sleep(1)
+                print("starting now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                continue
 
 if __name__ == '__main__':
     g = Game(1)

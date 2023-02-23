@@ -35,7 +35,8 @@ class Player:
         else:
             self.source = source
             self.cap = cap
-
+        self.cap.set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
+        self.cap.set(cv.CAP_PROP_EXPOSURE, -7.0)
         # initialize the player background
         self.__get_background()
         # self.cap = cv.VideoCapture(self.source)
@@ -50,9 +51,9 @@ class Player:
         self.grid = Grid(height, width * 3)
 
     def move(self, cx, cy):
-        thrash_height = 60
-        offset_height = 20
-        thrash_width = 100
+        thrash_height = THRESH_HEIGHT
+        offset_height = OFFSET_HEIGHT
+        thrash_width = THRESH_WIDTH
         cy = cy - offset_height
         if self.center[0] > cx + thrash_width:
             self.keyboard.PressKey(self.dict['left'])
@@ -158,7 +159,7 @@ class Player:
 
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
-            for i in range(3):
+            for i in range(MEDIAN_FILTER):
                 blur = cv.medianBlur(blur, MEDIAN_KERNEL)
             ret, thresh = cv.threshold(blur, self.binary_thresh, 255, cv.THRESH_BINARY)
             contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -166,7 +167,9 @@ class Player:
             x, y, w, h = 0, 0, 0, 0
             try:
                 for contour in sort_contours:
+                    # print(f'contour area is {cv.contourArea(contour)}, frame size is {frame.shape[0] * frame.shape[1]}')
                     if cv.contourArea(contour) >= frame.shape[0] * frame.shape[1] * FRAME_AREA_THRESHOLD:
+                        print('skipped')
                         continue
                     else:
                         x, y, w, h = cv.boundingRect(contour)
@@ -191,7 +194,7 @@ class Player:
             except:
                 pass
             cv.imshow("get height and width for player {}".format(self.player_num), original_frame)
-            # cv.imshow("thresh", thresh)
+            cv.imshow("thresh", thresh)
             # cv.imshow("subtract image", blur)
             k = cv.waitKey(1)
 
@@ -235,10 +238,10 @@ class Player:
             k = cv.waitKey(1)
             if type(self.source) != int:
                 time.sleep(1)
-            if k % 256 == 27:
-                # ESC pressed
-                print("Escape hit, closing...")
-                break
+            # if k % 256 == 27:
+            #     # ESC pressed
+            #     print("Escape hit, closing...")
+            #     break
             elif k % 256 == 32:
                 # SPACE pressed
                 if input("are you sure? (y/n) ") == 'n':
