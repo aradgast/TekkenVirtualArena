@@ -46,7 +46,7 @@ def find_lines(frame, hight):
     return count > 0
 
 if __name__ == '__main__':
-    cap = cv.VideoCapture(1)
+    cap = cv.VideoCapture(0)
     while True:
         ret, frame = cap.read()
         if ret:
