@@ -3,7 +3,7 @@ import cv2 as cv
 from player import Player
 from legend import *
 from keyboard_infr import KeyBoardInterface as KI
-
+import numpy as np
 
 class Game:
     def __init__(self, num_players=1):
@@ -53,7 +53,8 @@ class Game:
                     exit()
 
                 diff = cv.absdiff(frame, frame2)
-
+                if np.sum(diff) < GAME_DIFF_THRESHOLD:
+                    continue
                 # Convert the frame to grayscale
                 gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
                 diff_gray = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
@@ -77,12 +78,15 @@ class Game:
                 contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
                 # Find the largest contour
-                sort_contours = sorted(contours, key=cv.contourArea)
+                sort_contours = sorted(contours, key=cv.contourArea, reverse=True)
                 try:
-                    c = sort_contours[-1]
-                    if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.9:
-                        c = sort_contours[-2]
 
+                    for contour in sort_contours:
+                        if cv.contourArea(contour) >= frame.shape[0] * frame.shape[1] * FRAME_AREA_THRESHOLD:
+                            continue
+                        else:
+                            c = contour
+                            break
                     # Find the center of mass of the contour
                     M = cv.moments(c)
                     cx = int(M['m10'] / M['m00'])

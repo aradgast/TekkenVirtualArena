@@ -162,15 +162,17 @@ class Player:
                 blur = cv.medianBlur(blur, MEDIAN_KERNEL)
             ret, thresh = cv.threshold(blur, self.binary_thresh, 255, cv.THRESH_BINARY)
             contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-            sort_contours = sorted(contours, key=cv.contourArea)
+            sort_contours = sorted(contours, key=cv.contourArea, reverse=True)
+            x, y, w, h = 0, 0, 0, 0
             try:
-                c = sort_contours[-1]
-                if cv.contourArea(c) >= frame.shape[0] * frame.shape[1] * 0.8:
-                    x, y, w, h = cv.boundingRect(sort_contours[-2])
-                else:
-                    x, y, w, h = cv.boundingRect(c)
+                for contour in sort_contours:
+                    if cv.contourArea(contour) >= frame.shape[0] * frame.shape[1] * FRAME_AREA_THRESHOLD:
+                        continue
+                    else:
+                        x, y, w, h = cv.boundingRect(contour)
+                        break
             except:
-                continue
+                pass
             # w = h // 2 #!!!!!!!!!!!!!!!!!!!!!!
             cv.rectangle(original_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             try:
