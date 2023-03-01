@@ -36,7 +36,7 @@ class Player:
             self.source = source
             self.cap = cap
         self.cap.set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
-        self.cap.set(cv.CAP_PROP_EXPOSURE, -7.0)
+        self.cap.set(cv.CAP_PROP_EXPOSURE, EXPOSURE_VALUE)
         # initialize the player background
         self.__get_background()
         # self.cap = cv.VideoCapture(self.source)
@@ -220,7 +220,7 @@ class Player:
 
     def __get_background(self):
         # Get background image from source
-
+        a = EXPOSURE_VALUE
         print(f"press SPCAE when ready to acquire background for player {self.player_num}")
         while True:
             ret, frame = self.cap.read()
@@ -238,11 +238,30 @@ class Player:
             k = cv.waitKey(1)
             if type(self.source) != int:
                 time.sleep(1)
+
+            try:
+                if k%256 == 54:
+                    a += 1
+                    self.cap.set(cv.CAP_PROP_EXPOSURE, a)
+                    print("EXPOSURE_VALUE: {}".format(a))
+                    cv.text(frame, "BINARY_THRESHOLD: {}".format(a), (10, 30),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+                elif k%256 == 52:
+                    a -= 1
+                    self.cap.set(cv.CAP_PROP_EXPOSURE, a)
+                    print("EXPOSURE_VALUE: {}".format(a))
+                    cv.text(frame, "BINARY_THRESHOLD: {}".format(a), (10, 30),
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+            except:
+                pass
+
             # if k % 256 == 27:
             #     # ESC pressed
             #     print("Escape hit, closing...")
             #     break
-            elif k % 256 == 32:
+            if k % 256 == 32:
                 # SPACE pressed
                 if input("are you sure? (y/n) ") == 'n':
                     print("try again")

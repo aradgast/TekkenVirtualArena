@@ -70,7 +70,7 @@ class Game:
                 diff_blur = cv.GaussianBlur(diff_gray, GAUSS_KERNEL, 0)
 
                 for i in range(MEDIAN_FILTER):
-                    blur = cv.medianBlur(blur, MEDIAN_KERNEL)
+                    blur = cv.medianBlur(blur, MEDIAN_KERNEL_BODY)
                     diff_blur = cv.medianBlur(diff_blur, MEDIAN_KERNEL)
 
                 # Threshold the image to create a binary image
@@ -93,6 +93,13 @@ class Game:
                         else:
                             c = contour
                             break
+
+                    for contour in sort_contours:
+                        if cv.contourArea(contour) >= frame.shape[0] * frame.shape[1] * FRAME_AREA_THRESHOLD:
+                            continue
+                        else:
+                            c = contour
+                            break
                     # Find the center of mass of the contour
                     M = cv.moments(c)
                     cx = int(M['m10'] / M['m00'])
@@ -107,6 +114,7 @@ class Game:
 
                     # Find the bounding box of the contour
                     x, y, w, h = cv.boundingRect(c)
+                    h = frame.shape[0] - y - 10
                     player.draw_activation_grid(original_frame, cx, cy)
 
                     # Draw the bounding box on the frame
@@ -130,6 +138,22 @@ class Game:
                     time.sleep(1)
                 print("starting now!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 continue
+
+            # wait for space to pause the game
+
+            if cv.waitKey(1) == 32:
+                print('PAUSE')
+                while True:
+                    if cv.waitKey(1) == 32:
+                        print('RESUME')
+                        break
+
+            #wait  for q to quit the game
+
+            if cv.waitKey(1) == ord('q'):
+                print('QUIT')
+                break
+
 
 if __name__ == '__main__':
     g = Game(1)

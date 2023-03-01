@@ -26,7 +26,7 @@ def find_lines(frame, hight):
                 if np.pi / 2 + eps/2 < np.pi + theta < np.pi / 2 + 2 * eps or np.pi / 2 - 2 * eps < theta < np.pi / 2 - eps/2:
                     count += 1
                     # print(f'found line pi/2 in frame')
-                    cv.line(cdst, (l[0], l[1]), (l[2], l[3]), (255, 0, 0), 1, cv.LINE_AA)
+                    cv.line(cdst, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 3, cv.LINE_AA)
                 # elif np.pi / 3 - eps < theta < np.pi / 3 + eps or 2 * np.pi / 3 - eps < theta < 2 * np.pi / 3 + eps:
                 #     count += 1
                 #     print(f'found line pi/3 in frame')
