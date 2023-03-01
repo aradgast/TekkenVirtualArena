@@ -176,6 +176,13 @@ class Player:
                         break
             except:
                 pass
+            try:
+                max_contour = max(contours, key=lambda x: cv.boundingRect(x)[1] + cv.boundingRect(x)[3])
+                _, y_max, _, h_max = cv.boundingRect(max_contour)
+                y_diff = frame.shape[0] - y_max - h_max
+                h = frame.shape[0] - y_diff - y
+            except Exception:
+                pass
             # w = h // 2 #!!!!!!!!!!!!!!!!!!!!!!
             cv.rectangle(original_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             try:

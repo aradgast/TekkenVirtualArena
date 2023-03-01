@@ -94,16 +94,24 @@ class Game:
                             c = contour
                             break
 
-                    for contour in sort_contours:
-                        if cv.contourArea(contour) >= frame.shape[0] * frame.shape[1] * FRAME_AREA_THRESHOLD:
-                            continue
-                        else:
-                            c = contour
-                            break
-                    # Find the center of mass of the contour
-                    M = cv.moments(c)
-                    cx = int(M['m10'] / M['m00'])
-                    cy = int(M['m01'] / M['m00'])
+                # find contour with max y+height
+                    max_contour = max(contours, key=lambda x: cv.boundingRect(x)[1] + cv.boundingRect(x)[3])
+                    _, y_max, _, h_max = cv.boundingRect(max_contour)
+                    y_diff = frame.shape[0] - y_max - h_max
+
+                    # Find the bounding box of the contour
+                    x, y, w, h = cv.boundingRect(c)
+                    # h = max(player.height, h)
+                    h = frame.shape[0] - y_diff - y
+                    cx = x + w // 2
+                    cy = y + h // 2
+                    player.draw_activation_grid(original_frame, cx, cy)
+
+
+                    # # Find the center of mass of the contour
+                    # M = cv.moments(c)
+                    # cx = int(M['m10'] / M['m00'])
+                    # cy = int(M['m01'] / M['m00'])
 
                     # Draw the center of mass on the frame
                     cv.circle(original_frame, (cx, cy), 5, (0, 0, 255), -1)
@@ -111,11 +119,6 @@ class Game:
                     # check if the player moved
                     player.move(cx, cy)
                     player.action(diff_thresh, (cx, cy), gray)
-
-                    # Find the bounding box of the contour
-                    x, y, w, h = cv.boundingRect(c)
-                    h = frame.shape[0] - y - 10
-                    player.draw_activation_grid(original_frame, cx, cy)
 
                     # Draw the bounding box on the frame
                     cv.rectangle(original_frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -144,7 +147,8 @@ class Game:
             if cv.waitKey(1) == 32:
                 print('PAUSE')
                 while True:
-                    if cv.waitKey(1) == 32:
+                    # wait for enter to resume the game
+                    if cv.waitKey(1) == 13:
                         print('RESUME')
                         break
 
