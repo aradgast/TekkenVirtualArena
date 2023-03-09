@@ -3,7 +3,9 @@ from keyboard_infr import KeyBoardInterface as KI
 import time
 from grid import Grid
 from legend import *
-
+from threading import Thread
+import sys
+from time import time as timer
 
 class Player:
     def __init__(self, player_num, dict, keyboard, cap=None, source=None):
@@ -37,6 +39,7 @@ class Player:
             self.cap = cap
         self.cap.set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
         self.cap.set(cv.CAP_PROP_EXPOSURE, EXPOSURE_VALUE)
+        #     self.cap.set(cv.CAP_PROP_FPS, 30)
         # initialize the player background
         self.__get_background()
         # self.cap = cv.VideoCapture(self.source)
@@ -151,11 +154,12 @@ class Player:
     def __get_height_and_width(self):
         print(f"press SPCAE when ready to acquire height and width for player {self.player_num}")
         while True:
+            # start = timer()
             ret, original_frame = self.cap.read()
             frame = cv.absdiff(original_frame, self.background)
-            if type(self.source) != int:
-                frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
-                frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
+            # if type(self.source) != int:
+            #     frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
+            #     frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
 
             gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             blur = cv.GaussianBlur(gray, GAUSS_KERNEL, 0)
@@ -206,7 +210,7 @@ class Player:
             k = cv.waitKey(1)
 
             if type(self.source) != int:
-                time.sleep(1)
+                time.sleep(0.02)
             if k % 256 == 27:
                 # ESC pressed
                 print("Escape hit, closing...")
@@ -231,10 +235,11 @@ class Player:
         print(f"press SPCAE when ready to acquire background for player {self.player_num}")
         while True:
             ret, frame = self.cap.read()
-            if type(self.source) != int:
-                # frame = cv.flip(frame,1)
-                frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
-                frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
+            # if type(self.source) != int:
+
+            #     # frame = cv.flip(frame,1)
+            #     frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
+            #     frame = cv.rotate(frame, cv.ROTATE_90_CLOCKWISE)
 
             if not ret:
                 print("ERROR - failed to grab frame")
@@ -244,7 +249,7 @@ class Player:
 
             k = cv.waitKey(1)
             if type(self.source) != int:
-                time.sleep(1)
+                time.sleep(0.02)
 
             try:
                 if k%256 == 54:

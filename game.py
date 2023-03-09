@@ -45,9 +45,9 @@ class Game:
         while True:
             for player in self.players:
                 ret, original_frame = player.cap.read()
-                if type(player.source) != int:
-                    original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
-                    original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
+                # if type(player.source) != int:
+                #     original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
+                #     original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
                 frame = cv.absdiff(original_frame, player.background)  # subtract background
                 time.sleep(0.001)
                 ret, frame2 = player.cap.read()
@@ -157,7 +157,8 @@ class Game:
             if cv.waitKey(1) == ord('q'):
                 print('QUIT')
                 break
-
+            if type(player.source) != int:
+                time.sleep(0.02)
 
 if __name__ == '__main__':
     g = Game(1)
