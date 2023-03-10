@@ -3,7 +3,7 @@ import numpy as np
 from legend import *
 
 def find_lines(frame, hight):
-    print('ssearching for lines in frame')
+    # print('searching for lines in frame')
     count = 0
     dst = cv.Canny(frame, CANNY_LOW, CANNY_HIGH, None, 3)
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)

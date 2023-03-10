@@ -23,6 +23,8 @@ class Player:
         self.punch_counter = 0
         self.kick_counter = 0
         self.binary_thresh = BINARY_THRESHOLD
+        self.total_right_punches = 0
+        self.total_left_punches = 0
 
         # initialize the player source
         if cap is None:
@@ -108,6 +110,10 @@ class Player:
             elif key[:5] == 'punch' and not self.pressed_punch_key:
                 self.keyboard.PressKey(self.dict[key])
                 print(f"key {key} is pressed")
+                if key[6] == 'r':
+                    self.total_right_punches += 1
+                elif key[6] == 'l':
+                    self.total_left_punches += 1
                 self.pressed_punch_key = True
                 self.punch_counter = PUNCH_COUNTER
             else:
@@ -210,7 +216,7 @@ class Player:
             k = cv.waitKey(1)
 
             if type(self.source) != int:
-                time.sleep(0.02)
+                time.sleep(0.01)
             if k % 256 == 27:
                 # ESC pressed
                 print("Escape hit, closing...")
@@ -249,7 +255,7 @@ class Player:
 
             k = cv.waitKey(1)
             if type(self.source) != int:
-                time.sleep(0.02)
+                time.sleep(0.01)
 
             try:
                 if k%256 == 54:

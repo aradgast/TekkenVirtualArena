@@ -49,11 +49,11 @@ class Game:
                 #     original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
                 #     original_frame = cv.rotate(original_frame, cv.ROTATE_90_CLOCKWISE)
                 frame = cv.absdiff(original_frame, player.background)  # subtract background
-                time.sleep(0.001)
+                time.sleep(0.0001)
                 ret, frame2 = player.cap.read()
-                if type(player.source) != int:
-                    frame2 = cv.rotate(frame2, cv.ROTATE_90_CLOCKWISE)
-                    frame2 = cv.rotate(frame2, cv.ROTATE_90_CLOCKWISE)
+                # if type(player.source) != int:
+                #     frame2 = cv.rotate(frame2, cv.ROTATE_90_CLOCKWISE)
+                #     frame2 = cv.rotate(frame2, cv.ROTATE_90_CLOCKWISE)
                 frame2 = cv.absdiff(frame2, player.background)  # subtract background
                 if not ret:
                     exit()
@@ -156,9 +156,11 @@ class Game:
 
             if cv.waitKey(1) == ord('q'):
                 print('QUIT')
+                print(f"total right punches = {player.total_right_punches}")
+                print(f"total left punches = {player.total_left_punches}")
                 break
-            if type(player.source) != int:
-                time.sleep(0.02)
+            # if type(player.source) != int:
+            #     time.sleep(0.001)
 
 if __name__ == '__main__':
     g = Game(1)
